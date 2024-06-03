@@ -2,12 +2,16 @@ import sqlite3
 from typing import List, Optional
 from .exceptions import DuplicateValueError
 from . import schemas, utils
+import re
 
 DATABASE_URL = "test.db"
 
 
 def get_connection():
     conn = sqlite3.connect(DATABASE_URL)
+    conn.create_function(
+        "REGEXP", 2, lambda expr, item: re.search(expr, item) is not None
+    )
     return conn
 
 
@@ -66,9 +70,9 @@ def get_sports(filters: Optional[dict] = None) -> List[schemas.Sport]:
     params = []
     if filters:
         for key, value in filters.items():
-            if key == "name_like":
-                query += " AND name LIKE ?"
-                params.append(f"%{value}%")
+            if key == "name_regex":
+                query += " AND name REGEXP ?"
+                params.append(value)
             elif key == "min_active_events":
                 query += """ AND id IN (SELECT sport_id FROM events WHERE active=1 GROUP BY sport_id HAVING COUNT(*) >= ?)"""
                 params.append(value)
@@ -185,9 +189,9 @@ def get_events(filters: Optional[dict] = None) -> List[schemas.Event]:
             elif key == "scheduled_start_lte":
                 query += " AND scheduled_start <= ?"
                 params.append(value)
-            elif key == "name_like":
-                query += " AND name LIKE ?"
-                params.append(f"%{value}%")
+            elif key == "name_regex":
+                query += " AND name REGEXP ?"
+                params.append(value)
             elif key == "min_active_selections":
                 query += """ AND id IN (SELECT event_id FROM selections WHERE active=1 GROUP BY event_id HAVING COUNT(*) >= ?)"""
                 params.append(value)
@@ -293,15 +297,15 @@ def get_selections(filters: Optional[dict] = None) -> List[schemas.Selection]:
     params = []
     if filters:
         for key, value in filters.items():
-            if key == "price_gte" in filters:
+            if key == "price_gte":
                 query += " AND price >= ?"
                 params.append(value)
-            elif key == "price_lte" in filters:
+            elif key == "price_lte":
                 query += " AND price <= ?"
                 params.append(value)
-            elif key == "name_like":
-                query += " AND name LIKE ?"
-                params.append(f"%{value}%")
+            elif key == "name_regex":
+                query += " AND name REGEXP ?"
+                params.append(value)
             else:
                 query += f" AND {key}=?"
                 params.append(utils.bool_string_to_int(value))
