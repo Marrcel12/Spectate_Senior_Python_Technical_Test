@@ -1,6 +1,5 @@
 import sqlite3
 from typing import List, Optional
-
 from .exceptions import DuplicateValueError
 from . import schemas, utils
 
@@ -70,10 +69,13 @@ def get_sports(filters: Optional[dict] = None) -> List[schemas.Sport]:
             if key == "name_like":
                 query += " AND name LIKE ?"
                 params.append(f"%{value}%")
+            elif key == "min_active_events":
+                query += """ AND id IN (SELECT sport_id FROM events WHERE active=1 GROUP BY sport_id HAVING COUNT(*) >= ?)"""
+                params.append(value)
             else:
                 query += f" AND {key}=?"
                 params.append(utils.bool_string_to_int(value))
-                
+
     cursor.execute(query, params)
     rows = cursor.fetchall()
     conn.close()
@@ -177,20 +179,22 @@ def get_events(filters: Optional[dict] = None) -> List[schemas.Event]:
     params = []
     if filters:
         for key, value in filters.items():
-            print(key, value)
             if key == "scheduled_start_gte":
                 query += " AND scheduled_start >= ?"
                 params.append(value)
-            elif  key == "scheduled_start_lte":
+            elif key == "scheduled_start_lte":
                 query += " AND scheduled_start <= ?"
                 params.append(value)
             elif key == "name_like":
                 query += " AND name LIKE ?"
                 params.append(f"%{value}%")
+            elif key == "min_active_selections":
+                query += """ AND id IN (SELECT event_id FROM selections WHERE active=1 GROUP BY event_id HAVING COUNT(*) >= ?)"""
+                params.append(value)
             else:
                 query += f" AND {key}=?"
                 params.append(utils.bool_string_to_int(value))
-    print(query, params)
+
     cursor.execute(query, params)
     rows = cursor.fetchall()
     conn.close()
