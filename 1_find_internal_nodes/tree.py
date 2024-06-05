@@ -14,3 +14,8 @@ def find_internal_nodes_num(L):
         5
     """
     return len(set((L)))-1
+
+if __name__ == "__main__":
+    input_list = list(map(int, input("Enter the tree structure as a list of integers separated by spaces: ").split()))
+    result = find_internal_nodes_num(input_list)
+    print(f"Number of internal nodes: {result}")

@@ -1,13 +1,18 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+from pydantic import BaseModel
+
+
 class SportCreate(BaseModel):
     name: str
+    active: bool
+
 
 class SportUpdate(BaseModel):
     name: Optional[str] = None
     active: Optional[bool] = None
+
 
 class Sport(BaseModel):
     id: int
@@ -18,16 +23,19 @@ class Sport(BaseModel):
     class Config:
         from_attributes = True
 
+
 class EventCreate(BaseModel):
     name: str
     type: str
     sport_id: int
     scheduled_start: datetime
 
+
 class EventUpdate(BaseModel):
     name: Optional[str] = None
     active: Optional[bool] = None
     status: Optional[str] = None
+
 
 class Event(BaseModel):
     id: int
@@ -43,15 +51,19 @@ class Event(BaseModel):
     class Config:
         from_attributes = True
 
+
 class SelectionCreate(BaseModel):
     name: str
     event_id: int
     price: float
 
+
 class SelectionUpdate(BaseModel):
     name: Optional[str] = None
     active: Optional[bool] = None
     outcome: Optional[str] = None
+    price: Optional[float] = None
+
 
 class Selection(BaseModel):
     id: int

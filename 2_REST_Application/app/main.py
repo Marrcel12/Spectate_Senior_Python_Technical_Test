@@ -1,10 +1,11 @@
 from typing import Literal
-from flask import Blueprint, request, jsonify
+
+from flask import Blueprint, current_app, jsonify, request
 from flask.wrappers import Response
 from pydantic import ValidationError
 
-from .exceptions import DuplicateValueError
 from . import crud, schemas
+from .exceptions import DuplicateValueError, NotExistError
 
 main_bp = Blueprint("main", __name__)
 
@@ -43,6 +44,9 @@ def handle_errors(f):
             )
         except ValidationError as e:
             return jsonify({"error": "ValidationError", "message": str(e)}), 400
+        except NotExistError as e:
+            return jsonify({"error": "NotExistError", "message": str(e)}), 404
+
     decorated_function.__name__ = f.__name__
     return decorated_function
 
@@ -65,11 +69,19 @@ def update_sport(sport_id):
     updated_sport = crud.update_sport(sport_id, sport)
     return jsonify(updated_sport.model_dump()), 200
 
+
 @main_bp.route("/sports/", methods=["GET"])
 def read_sports():
     filters = request.args.to_dict()
     sports = crud.get_sports(filters)
     return jsonify([sport.model_dump() for sport in sports]), 200
+
+
+@main_bp.route("/sports/<int:sport_id>", methods=["GET"])
+@handle_errors
+def read_sport(sport_id):
+    sport = crud.get_sport(sport_id)
+    return jsonify(sport.model_dump()), 200
 
 
 # Events endpoints
@@ -98,6 +110,13 @@ def read_events() -> tuple[Response, Literal[200]]:
     return jsonify([event.model_dump() for event in events]), 200
 
 
+@main_bp.route("/events/<int:event_id>", methods=["GET"])
+@handle_errors
+def read_event(event_id):
+    event = crud.get_event(event_id)
+    return jsonify(event.model_dump()), 200
+
+
 # Selections endpoints
 @main_bp.route("/selections/", methods=["POST"])
 @handle_errors
@@ -122,3 +141,10 @@ def read_selections():
     filters = request.args.to_dict()
     selections = crud.get_selections(filters)
     return jsonify([selection.model_dump() for selection in selections]), 200
+
+
+@main_bp.route("/selections/<int:selection_id>", methods=["GET"])
+@handle_errors
+def read_selection(selection_id):
+    selection = crud.get_selection(selection_id)
+    return jsonify(selection.model_dump()), 200

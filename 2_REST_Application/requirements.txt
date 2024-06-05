@@ -1,0 +1,6 @@
+Flask
+pydantic
+alembic
+black
+isort
+pytest-cov
