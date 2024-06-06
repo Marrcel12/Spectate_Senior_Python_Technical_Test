@@ -176,6 +176,10 @@ This project is a simple REST API for managing sports, events, and selections. I
     ```sh
     flask run
     ```
+5. **Optional Run the application**:
+    ```sh
+    python app/populate.py
+    ```
 
 ### Docker
 
@@ -363,12 +367,6 @@ The REST API includes the following functionalities for managing sports, events,
 
 4. **Business Logic:**
    - **Event becomes inactive when all selections are inactive:** Tests that an event becomes inactive when all its selections are inactive.
-
-### Notes
-
-- Ensure that the testing environment is properly set up before running the tests.
-- The tests assume that the database and application context are correctly configured.
-- Running these tests will verify the functionality and robustness of the REST API.
 ---
 ## Running Unit Tests and Viewing Coverage Results
 

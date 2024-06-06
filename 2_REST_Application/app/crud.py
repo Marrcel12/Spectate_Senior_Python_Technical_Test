@@ -149,10 +149,9 @@ def update_event(event_id: int, event: schemas.EventUpdate) -> schemas.Event:
         # Check if all events for the sport are inactive
 
         cursor.execute(
-            """UPDATE sports SET active = (SELECT CASE WHEN COUNT(*) = 0 THEN 0 ELSE 1 END
-                            FROM events WHERE sport_id = ? AND active = 1)
-                            WHERE id = (SELECT sport_id FROM events WHERE id = ?)""",
-            (current_event.sport_id, event_id),
+            """UPDATE sports SET active = (SELECT CASE WHEN COUNT(*) > 0 THEN 0 ELSE 1 END
+                            FROM events WHERE id = ? AND active = 0) WHERE id = (SELECT sport_id FROM events WHERE id = ?)""",
+            (event_id, event_id),
         )
         conn.commit()
 
@@ -305,8 +304,8 @@ def update_selection(
 
         # If all events of the sport are inactive, make the sport inactive
         cursor.execute(
-            """UPDATE sports SET active = (SELECT CASE WHEN COUNT(*) = 0 THEN 0 ELSE 1 END
-                            FROM events WHERE sport_id = ? AND active = 1) WHERE id = (SELECT sport_id FROM events WHERE id = ?)""",
+            """UPDATE sports SET active = (SELECT CASE WHEN COUNT(*) > 0 THEN 0 ELSE 1 END
+                            FROM events WHERE id = ? AND active = 0) WHERE id = (SELECT sport_id FROM events WHERE id = ?)""",
             (event_id, event_id),
         )
         conn.commit()
