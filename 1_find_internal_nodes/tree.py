@@ -13,6 +13,8 @@ def find_internal_nodes_num(L):
         >>> find_internal_nodes_num([-1, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4])
         5
     """
+    if len(L) == 0:
+        return 0
     return len(set((L))) - 1
 
 
